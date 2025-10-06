@@ -98,7 +98,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的梯度为：
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{W}}=\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i,\text{where}\;\;\mathbf{R}=\frac{1}{\textbf{RMS}(\mathbf{a})}\left(\mathbf{I}-\frac{(\mathbf{Wx})(\mathbf{Wx}^T)}{n\textbf{RMS}(\mathbf{a})^2}\right)," alt="LaTeX">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{W}}=\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i,\text{where}\;\;\mathbf{R}=\frac{1}{\textbf{RMS}(\mathbf{a})}\left(\mathbf{I}-\frac{(\mathbf{Wx})(\mathbf{Wx})^T}{n\textbf{RMS}(\mathbf{a})^2}\right)," alt="LaTeX">
 </p>
 
 如果对 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}) 或 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 施加缩放因子 ![LaTeX](https://latex.codecogs.com/svg.latex?\delta)，即：
