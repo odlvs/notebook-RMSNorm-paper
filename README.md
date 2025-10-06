@@ -136,7 +136,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 
 ## partial RMSNorm
 
-同层神经元（隐藏维度/输出维度）具有独立同分布的结构，于是作者团队认为 RMS 可仅基于部分神经元进行估算。设输入 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{a}\in\mathbb{R}^n)，基于前 ![LaTeX](https://latex.codecogs.com/svg.latex?p%) 个维度值估算：
+同层神经元（隐藏维度/输出维度）具有独立同分布的结构，于是作者团队认为 RMS 可仅基于部分神经元进行估算。设输入 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{a}\in\mathbb{R}^n)，基于前 ![LaTeX](https://latex.codecogs.com/svg.latex?k%) 个维度值估算：
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\overline{\textbf{RMS}}(\mathbf{a})=\sqrt{\frac{1}{k}\sum_{i=1}^{k}a_i^2},\text{where}\;\;k=\lceil{}n\cdot{}p\rceil," alt="LaTeX">
