@@ -1,3 +1,6 @@
+[《Root Mean Square Layer Normalization》论文链接](https://arxiv.org/pdf/1910.07467)
+<br><br><br>
+
 ## LayerNorm
 
 一个原始输入向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}\in\mathbb{R}^m)，经过线性变换、非线性激活之后，被映射为输出向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{y}\in\mathbb{R}^n)：
@@ -50,7 +53,7 @@ RMS 具有线性，即：
 于是设：
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\mathbf{a}'=\delta\mathbf{a}=\mathbf{W}(\delta\mathbf{x})\quad{}or\quad{}(\delta\mathbf{W})\mathbf{x}," alt="LaTeX">
+<img src="https://latex.codecogs.com/svg.latex?\mathbf{a}'=\delta\mathbf{a}=\mathbf{W}(\delta\mathbf{x})\;\;\text{or}\;\;(\delta\mathbf{W})\mathbf{x}," alt="LaTeX">
 </p>
 
 从而有：
@@ -79,4 +82,82 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 <img src="https://latex.codecogs.com/svg.latex?\mathbf{y}=f(\mathbf{v}),\quad{}\mathbf{v}=\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})}\odot\mathbf{g}+\mathbf{b},\quad{}\mathbf{a}=\mathbf{W}\mathbf{x}," alt="LaTeX">
 </p>
 
-其中 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g},\mathbf{b},\mathbf{W}) 是作为优化对象的可学习参数，损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g},\mathbf{b}) 的梯度分别为：
+其中 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{b})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 是作为优化对象的可学习参数。损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{v}) 的梯度
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{v}}" alt="LaTeX">
+</p>
+
+是上游回传的已知梯度，关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{b}) 的梯度则分别为：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{g}}=\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\frac{\partial\mathbf{v}}{\partial\mathbf{g}}=\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\odot\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})},\quad{}\frac{\partial\mathcal{L}}{\partial\mathbf{b}}=\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\frac{\partial\mathbf{v}}{\partial\mathbf{b}}=\frac{\partial\mathcal{L}}{\partial\mathbf{v}}," alt="LaTeX">
+</p>
+
+它们都具备缩放不变性。<br>
+损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的梯度为：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{W}}=\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i,\text{where}\;\;\mathbf{R}=\frac{1}{\textbf{RMS}(\mathbf{a})}\left(\mathbf{I}-\frac{(\mathbf{Wx})(\mathbf{Wx}^T)}{n\textbf{RMS}(\mathbf{a})^2}\right)," alt="LaTeX">
+</p>
+
+如果对 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}) 或 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 施加缩放因子 ![LaTeX](https://latex.codecogs.com/svg.latex?\delta)，即：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\mathbf{a}'=\delta\mathbf{a}=\mathbf{W}(\delta\mathbf{x})\;\;\text{or}\;\;(\delta\mathbf{W})\mathbf{x}," alt="LaTeX">
+</p>
+
+那么：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\mathbf{R}'=\frac{1}{\delta\textbf{RMS}(\mathbf{a})}\left(\mathbf{I}-\frac{(\delta\mathbf{Wx})(\delta\mathbf{Wx})^T}{n\delta^2\textbf{RMS}(\mathbf{a})^2}\right)=\frac{1}{\delta}\mathbf{R}," alt="LaTeX">
+</p>
+
+当 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}'=\delta\mathbf{x}) 时，
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\sum_{i=1}^{n}\left[(\delta\mathbf{x}^T)\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\frac{1}{\delta}\mathbf{R}\right)\right]_i=\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i=\frac{\partial\mathcal{L}}{\partial\mathbf{W}}," alt="LaTeX">
+</p>
+
+而当 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}'=\delta\mathbf{W}) 时，
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\sum_{i=1}^{n}\left[(\mathbf{x}^T)\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\frac{1}{\delta}\mathbf{R}\right)\right]_i=\frac{1}{\delta}\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i=\frac{1}{\delta}\frac{\partial\mathcal{L}}{\partial\mathbf{W}}," alt="LaTeX">
+</p>
+
+这意味着，
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{W}}" alt="LaTeX">
+</p>
+
+对 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}) 具备缩放不变性，但与 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的缩放保持负相关。这种负相关性同时实现了对权重梯度范数、权重矩阵范数的控制。
+<br><br><br>
+
+## partial RMSNorm
+
+同层神经元（隐藏维度/输出维度）具有独立同分布的结构，于是作者团队认为 RMS 可仅基于部分神经元进行估算。设输入 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{a}\in\mathbb{R}^n)，基于前 ![LaTeX](https://latex.codecogs.com/svg.latex?p%) 个维度值估算：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\overline{\textbf{RMS}}(\mathbf{a})=\sqrt{\frac{1}{k}\sum_{i=1}^{k}a_i^2},\text{where}\;\;k=\lceil{}n\cdot{}p\rceil," alt="LaTeX">
+</p>
+
+作者团队观察到当原始输入向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}\in\mathbb{R}^m) 的维度数 ![LaTeX](https://latex.codecogs.com/svg.latex?m) 较小时，梯度不稳定，并实测在 ![LaTeX](https://latex.codecogs.com/svg.latex?p=6.25%) 时，模型仍然能够实现令人满意的收敛。
+<br><br><br>
+
+## 代码实现
+
+节选自[MiniMind模型定义代码第84-94行](https://github.com/jingyaogong/minimind/blob/master/model/model_minimind.py#L84-L94)
+```python
+class RMSNorm(torch.nn.Module):
+    def __init__(self, dim: int, eps: float = 1e-5):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def _norm(self, x):
+        return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+
+    def forward(self, x):
+        return self.weight * self._norm(x.float()).type_as(x)
+```
