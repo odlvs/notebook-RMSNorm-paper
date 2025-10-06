@@ -1,4 +1,4 @@
-[《Root Mean Square Layer Normalization》论文链接](https://arxiv.org/pdf/1910.07467)
+[《Root Mean Square Layer Normalization》论文](https://arxiv.org/pdf/1910.07467)学习笔记
 <br><br><br>
 
 ## LayerNorm
