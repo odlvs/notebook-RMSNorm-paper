@@ -41,13 +41,13 @@ RMSNorm 相比 LayerNorm 没有减均值操作，并且在数学形式上就是�
 RMS 具有线性，即：
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\textbf{RMS}(\alpha{}x)=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(\alpha{}x_i)^2}=\sqrt{\frac{1}{n}\alpha^2\sum_{i=1}^{n}x_i^2}=\alpha\sqrt{\frac{1}{n}\sum_{i=1}^{n}x_i^2}=\alpha\textbf{RMS}(x)," alt="LaTeX">
+<img src="https://latex.codecogs.com/svg.latex?\textbf{RMS}(\alpha{}\mathbf{x})=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(\alpha{}x_i)^2}=\sqrt{\frac{1}{n}\alpha^2\sum_{i=1}^{n}x_i^2}=\alpha\sqrt{\frac{1}{n}\sum_{i=1}^{n}x_i^2}=\alpha\textbf{RMS}(\mathbf{x})," alt="LaTeX">
 </p>
 
 进而：
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\frac{\alpha{}x}{\textbf{RMS}(\alpha{}x)}=\frac{\alpha{}x}{\alpha\textbf{RMS}(x)}=\frac{x}{\textbf{RMS}(x)}," alt="LaTeX">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\alpha{}\mathbf{x}}{\textbf{RMS}(\alpha{}\mathbf{x})}=\frac{\alpha{}\mathbf{x}}{\alpha\textbf{RMS}(\mathbf{x})}=\frac{\mathbf{x}}{\textbf{RMS}(\mathbf{x})}," alt="LaTeX">
 </p>
 
 于是设：
