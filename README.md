@@ -125,7 +125,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 <img src="https://latex.codecogs.com/svg.latex?\sum_{i=1}^{n}\left[(\mathbf{x}^T)\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\frac{1}{\delta}\mathbf{R}\right)\right]_i=\frac{1}{\delta}\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i=\frac{1}{\delta}\frac{\partial\mathcal{L}}{\partial\mathbf{W}}," alt="LaTeX">
 </p>
 
-这意味着，
+这意味着，损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的梯度
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{W}}" alt="LaTeX">
