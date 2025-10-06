@@ -81,7 +81,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 <img src="https://latex.codecogs.com/svg.latex?\mathbf{y}=f(\mathbf{v}),\quad{}\mathbf{v}=\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})}\odot\mathbf{g}+\mathbf{b},\quad{}\mathbf{a}=\mathbf{W}\mathbf{x}," alt="LaTeX">
 </p>
 
-其中 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{b})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 是作为优化对象的可学习参数。损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{v}) 的梯度
+其中 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{b})、![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 是作为优化对象的可训练参数。损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{v}) 的梯度
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{v}}" alt="LaTeX">
@@ -144,7 +144,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 作者团队观察到当原始输入向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}\in\mathbb{R}^m) 的维度数 ![LaTeX](https://latex.codecogs.com/svg.latex?m) 较小时，梯度不稳定，并实测在 ![LaTeX](https://latex.codecogs.com/svg.latex?p=6.25%) 时，模型仍然能够实现令人满意的收敛。
 <br><br><br>
 
-## 代码实现
+## 代码实现与解读
 
 节选自[MiniMind模型定义代码第84-94行](https://github.com/jingyaogong/minimind/blob/master/model/model_minimind.py#L84-L94)
 ```python
@@ -160,3 +160,30 @@ class RMSNorm(torch.nn.Module):
     def forward(self, x):
         return self.weight * self._norm(x.float()).type_as(x)
 ```
+
+```python
+return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+```
+对应表达式：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})},\text{where}\;\;\textbf{RMS}(\mathbf{a})=\sqrt{\frac{1}{n}\sum_{i=1}^{n}a_i^2}" alt="LaTeX">
+</p>
+
+`x` 形状为 `[B, H, L, dim]`，`torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)` 返回结果的形状为 `[B, H, L, 1]`，如果 `keepdim` 改为 `False`，返回结果的形状将变为 `[B, H, L]`，无法广播到 `[B, H, L, dim]` 进而与 `x` 进行逐元素乘（ `*` ）。`x.pow(2).mean(-1, keepdim=True)` 返回结果的元素大于等于 0，为避免等于 0 时 `torch.rsqrt(...)` 运算报错（分母为 0），需要紧随 `x.pow(2).mean(-1, keepdim=True)` 之后加上小常数 `self.eps`，从而确保括号内的结果的元素严格大于 0。`torch.rsqrt(...)` 相比 `1 / torch.sqrt(...)` 运算速度更快、开销更小。
+
+```python
+return self.weight * self._norm(x.float()).type_as(x)
+```
+对应表达式：
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})}\odot\mathbf{g}" alt="LaTeX">
+</p>
+
+将 `x` 显式转换到 `float32` 数据类型（ `x.float()` ）后，再送入 `_norm(...)` 方法执行归一化，可以提高平方、开根号等计算操作的结果精度，进而增强数据稳定性。将 `self._norm(x.float())` 的计算结果再接着转换回原类型（ `.type_as(x)` ），才能兼容后续与 `self.weight` 的运算。`self.weight` 即 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g})，用于恢复因归一化而损失的表达能力。
+
+```python
+self.weight = nn.Parameter(torch.ones(dim))
+```
+`torch.ones(dim)` 返回结果的形状为 `[dim]`，其元素全部为 1。`nn.Parameter(...)` 方法将其包装为可训练参数。
