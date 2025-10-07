@@ -146,10 +146,10 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 
 ## 代码实现与解读
 
-节选自[MiniMind模型定义代码第84-94行](https://github.com/jingyaogong/minimind/blob/master/model/model_minimind.py#L84-L94)
+节选自[TinyLLM模型定义代码第26-46行](https://github.com/datawhalechina/tiny-universe/blob/main/content/TinyLLM/code/model.py/#L26-L46)
 ```python
-class RMSNorm(torch.nn.Module):
-    def __init__(self, dim: int, eps: float = 1e-5):
+class RMSNorm(nn.Module):
+    def __init__(self, dim: int, eps: float):
         super().__init__()
         self.eps = eps
         self.weight = nn.Parameter(torch.ones(dim))
@@ -158,7 +158,8 @@ class RMSNorm(torch.nn.Module):
         return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
 
     def forward(self, x):
-        return self.weight * self._norm(x.float()).type_as(x)
+        output = self._norm(x.float()).type_as(x)
+        return output * self.weight
 ```
 
 ```python
@@ -173,7 +174,8 @@ return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
 `x` 形状为 `[B, H, L, dim]`，`torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)` 返回结果的形状为 `[B, H, L, 1]`，如果 `keepdim` 改为 `False`，返回结果的形状将变为 `[B, H, L]`，无法广播到 `[B, H, L, dim]` 进而与 `x` 进行逐元素乘（ `*` ）。`x.pow(2).mean(-1, keepdim=True)` 返回结果的元素大于等于 0，为避免等于 0 时 `torch.rsqrt(...)` 运算报错（分母为 0），需要紧随 `x.pow(2).mean(-1, keepdim=True)` 之后加上小常数 `self.eps`，从而确保括号内的结果的元素严格大于 0。`torch.rsqrt(...)` 相比 `1 / torch.sqrt(...)` 运算速度更快、开销更小。
 
 ```python
-return self.weight * self._norm(x.float()).type_as(x)
+output = self._norm(x.float()).type_as(x)
+return output * self.weight
 ```
 对应表达式：
 
