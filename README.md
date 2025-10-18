@@ -15,7 +15,7 @@
 </p>
 
 引入 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g}\in\mathbb{R}^n) 是为了恢复因归一化而损失的表达能力。
-<br><br><br>
+<br><br><br><br>
 
 ## RMSNorm
 
@@ -33,7 +33,7 @@ RMSNorm 相比 LayerNorm 没有减均值操作，并且在数学形式上就是�
 </p>
 
 从而各分量数值可控，非线性激活后的各分量数值也可控。
-<br><br><br>
+<br><br><br><br>
 
 ## 不变性
 
@@ -70,8 +70,8 @@ RMSNorm 则仅通过除以根均方
 <img src="https://latex.codecogs.com/svg.latex?\sqrt{\frac{1}{n}\sum_{i=1}^{n}a_i^2}" alt="LaTeX">
 </p>
 
-实现“重新缩放”以获得缩放不变性。作者团队通过实验发现 RMSNorm 的效果与 LayerNorm 的相比，持平甚至更优。
-<br><br><br>
+实现“重新缩放”以获得缩放不变性。论文作者团队通过实验发现 RMSNorm 的效果与 LayerNorm 的相比，持平甚至更优。
+<br><br><br><br>
 
 ## 梯度
 
@@ -94,7 +94,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 </p>
 
 它们都具备缩放不变性。<br>
-损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的梯度为：
+论文作者团队给出损失 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathcal{L}) 关于 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的梯度为：
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\frac{\partial\mathcal{L}}{\partial\mathbf{W}}=\sum_{i=1}^{n}\left[\mathbf{x}^T\otimes\left(\text{diag}\left(\mathbf{g}\odot\frac{\partial\mathcal{L}}{\partial\mathbf{v}}\right)\times\mathbf{R}\right)\right]_i,\text{where}\;\;\mathbf{R}=\frac{1}{\textbf{RMS}(\mathbf{a})}\left(\mathbf{I}-\frac{(\mathbf{Wx})(\mathbf{Wx})^T}{n\textbf{RMS}(\mathbf{a})^2}\right)," alt="LaTeX">
@@ -131,20 +131,20 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 </p>
 
 对 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}) 具备缩放不变性，但与 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{W}) 的缩放保持负相关。这种负相关性同时实现了对权重梯度范数、权重矩阵范数的控制。
-<br><br><br>
+<br><br><br><br>
 
 ## partial RMSNorm
 
-同层神经元（隐藏维度/输出维度）具有独立同分布的结构，于是作者团队认为 RMS 可仅基于部分神经元进行估算。设输入 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{a}\in\mathbb{R}^n)，基于前 ![LaTeX](https://latex.codecogs.com/svg.latex?k) 个维度值估算：
+同层神经元（隐藏维度/输出维度）具有独立同分布的结构，于是论文作者团队认为 RMS 可仅基于部分神经元进行估算。设输入 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{a}\in\mathbb{R}^n)，基于前 ![LaTeX](https://latex.codecogs.com/svg.latex?k) 个维度值估算：
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\overline{\textbf{RMS}}(\mathbf{a})=\sqrt{\frac{1}{k}\sum_{i=1}^{k}a_i^2},\text{where}\;\;k=\lceil{}n\cdot{}p\rceil," alt="LaTeX">
 </p>
 
-作者团队观察到当原始输入向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}\in\mathbb{R}^m) 的维度数 ![LaTeX](https://latex.codecogs.com/svg.latex?m) 较小时，梯度不稳定，并实测在 ![LaTeX](https://latex.codecogs.com/svg.latex?p=6.25%) 时，模型仍然能够实现令人满意的收敛。
-<br><br><br>
+论文作者团队观察到当原始输入向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}\in\mathbb{R}^m) 的维度数 ![LaTeX](https://latex.codecogs.com/svg.latex?m) 较小时，梯度不稳定，并实测在 ![LaTeX](https://latex.codecogs.com/svg.latex?p=6.25%) 时，模型仍然能够实现令人满意的收敛。
+<br><br><br><br>
 
-## 代码实现与解读
+## 代码实现
 
 节选自[Llama 3模型定义代码第31-42行](https://github.com/meta-llama/llama-models/blob/main/models/llama3/model.py/#L31-L42)
 ```python
@@ -161,29 +161,32 @@ class RMSNorm(torch.nn.Module):
         output = self._norm(x.float()).type_as(x)
         return output * self.weight
 ```
+<br><br>
 
 ```python
 return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
 ```
-对应表达式：
+对应表达式
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})},\text{where}\;\;\textbf{RMS}(\mathbf{a})=\sqrt{\frac{1}{n}\sum_{i=1}^{n}a_i^2}" alt="LaTeX">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})},\text{where}\;\;\textbf{RMS}(\mathbf{a})=\sqrt{\frac{1}{n}\sum_{i=1}^{n}a_i^2}," alt="LaTeX">
 </p>
 
 `x` 形状为 `[B, H, L, dim]`，`torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)` 返回结果的形状为 `[B, H, L, 1]`，如果 `keepdim` 改为 `False`，返回结果的形状将变为 `[B, H, L]`，无法广播到 `[B, H, L, dim]` 进而与 `x` 进行逐元素乘（ `*` ）。`x.pow(2).mean(-1, keepdim=True)` 返回结果的元素大于等于 0，为避免等于 0 时 `torch.rsqrt(...)` 运算报错（分母为 0），需要紧随 `x.pow(2).mean(-1, keepdim=True)` 之后加上小常数 `self.eps`，从而确保括号内的结果的元素严格大于 0。`torch.rsqrt(...)` 相比 `1 / torch.sqrt(...)` 运算速度更快、开销更小。
+<br><br><br><br>
 
 ```python
 output = self._norm(x.float()).type_as(x)
 return output * self.weight
 ```
-对应表达式：
+对应表达式
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})}\odot\mathbf{g}" alt="LaTeX">
+<img src="https://latex.codecogs.com/svg.latex?\frac{\mathbf{a}}{\textbf{RMS}(\mathbf{a})}\odot\mathbf{g}," alt="LaTeX">
 </p>
 
 将 `x` 显式转换到 `float32` 数据类型（ `x.float()` ）后，再送入 `_norm(...)` 方法执行归一化，可以提高平方、开根号等计算操作的结果精度，进而增强数据稳定性。将 `self._norm(x.float())` 的计算结果再接着转换回原类型（ `.type_as(x)` ），才能兼容后续与 `self.weight` 的运算。`self.weight` 即 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{g})，用于恢复因归一化而损失的表达能力。
+<br><br><br><br>
 
 ```python
 self.weight = nn.Parameter(torch.ones(dim))
