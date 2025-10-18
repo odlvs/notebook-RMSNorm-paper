@@ -146,10 +146,10 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 
 ## 代码实现与解读
 
-节选自[TinyLLM模型定义代码第26-46行](https://github.com/datawhalechina/tiny-universe/blob/main/content/TinyLLM/code/model.py/#L26-L46)
+节选自[Llama 3模型定义代码第31-42行](https://github.com/meta-llama/llama-models/blob/main/models/llama3/model.py/#L31-L42)
 ```python
-class RMSNorm(nn.Module):
-    def __init__(self, dim: int, eps: float):
+class RMSNorm(torch.nn.Module):
+    def __init__(self, dim: int, eps: float = 1e-6):
         super().__init__()
         self.eps = eps
         self.weight = nn.Parameter(torch.ones(dim))
