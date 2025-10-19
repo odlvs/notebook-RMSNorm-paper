@@ -144,7 +144,7 @@ Santurkar 等人指出归一化方法的成功并非来自于输入稳定性的�
 论文作者团队观察到当原始输入向量 ![LaTeX](https://latex.codecogs.com/svg.latex?\mathbf{x}\in\mathbb{R}^m) 的维度数 ![LaTeX](https://latex.codecogs.com/svg.latex?m) 较小时，梯度不稳定，并实测在 ![LaTeX](https://latex.codecogs.com/svg.latex?p=6.25%) 时，模型仍然能够实现令人满意的收敛。
 <br><br><br><br>
 
-## 代码实现
+## 代码
 
 节选自[Llama 2模型定义代码第34-77行](https://github.com/meta-llama/llama/blob/main/llama/model.py/#L34-L77)
 ```python
